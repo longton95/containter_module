@@ -1,0 +1,11 @@
+{
+  "appsDirectory": "/home/joshlongton/apps",
+  "containersList": [
+    "omnidesk-cloud-infrastructure",
+    "cnx-api-users",
+    "cxm",
+    "oa",
+    "social",
+    "omnidesk-interaction-websocket"
+  ]
+}
