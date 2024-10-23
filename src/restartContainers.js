@@ -75,7 +75,7 @@ async function main() {
       type: 'list',
       name: 'action',
       message: 'Choose the action to perform:',
-      choices: ['make', 'start', 'down', 'build'],
+      choices: ['make', 'start', 'down', 'build', 'git pull', 'lazy option'],
     },
     {
       type: 'confirm',
@@ -111,16 +111,33 @@ async function restartContainer(appsDirectory, container, action, verbose) {
     case 'build':
       args = ['up', '-d', '--build'];
       break;
+    case 'git pull':
+      command = 'git';
+      args = ['pull'];
+      break;
+    case 'lazy option':
+      console.log('You chose the lazy option. Sit back and relax while I handle everything!');
+      await runCommand('git', ['pull'], containerDir, verbose);
+      await runCommand('make', [], containerDir, verbose);
+      return;
   }
 
-  const child = spawn(command, args, { cwd: containerDir, stdio: verbose ? 'inherit' : 'pipe' });
+  await runCommand(command, args, containerDir, verbose);
+}
 
-  child.on('close', (code) => {
-    if (code === 0) {
-      console.log(`Action completed successfully for ${container}`);
-    } else {
-      console.error(`Error with ${container}: Process exited with code ${code}`);
-    }
+async function runCommand(command, args, cwd, verbose) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(command, args, { cwd, stdio: verbose ? 'inherit' : 'pipe' });
+
+    child.on('close', (code) => {
+      if (code === 0) {
+        console.log(`Command '${command} ${args.join(' ')}' completed successfully.`);
+        resolve();
+      } else {
+        console.error(`Error: Command '${command} ${args.join(' ')}' exited with code ${code}.`);
+        reject(new Error(`Process exited with code ${code}`));
+      }
+    });
   });
 }
 
